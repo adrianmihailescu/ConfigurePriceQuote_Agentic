@@ -47,3 +47,13 @@ export type QuoteSummary = {
   status: string
   createdAt: string
 }
+
+export type SalesOverview = {
+  quotesThisMonth: number
+  quotesLastMonth: number
+  totalQuotes: number
+  openQuotes: number
+  pipelineValue: number
+  winRate: number | null
+  decidedQuotes: number
+}

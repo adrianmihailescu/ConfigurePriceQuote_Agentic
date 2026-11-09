@@ -1,4 +1,4 @@
-import type { ChatResponse, Product, QuoteSummary } from './types'
+import type { ChatResponse, Product, QuoteSummary, SalesOverview } from './types'
 
 const apiBaseUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:5050').replace(/\/$/, '')
 
@@ -25,6 +25,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   catalog: () => request<Product[]>('/api/catalog'),
   quotes: () => request<QuoteSummary[]>('/api/quotes'),
+  overview: () => request<SalesOverview>('/api/overview'),
   chat: (productId: string, selectedOptions: Record<string, string>, message: string) =>
     request<ChatResponse>('/api/assistant/chat', {
       method: 'POST',

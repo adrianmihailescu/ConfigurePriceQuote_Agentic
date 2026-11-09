@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   Activity,
-  ArrowDownRight,
   ArrowRight,
   BadgeCheck,
   Bell,
@@ -25,7 +24,7 @@ import {
   X,
 } from 'lucide-react'
 import { api } from './api'
-import type { AgentStep, ChatResponse, Product, QuoteSummary } from './types'
+import type { AgentStep, ChatResponse, Product, QuoteSummary, SalesOverview } from './types'
 
 const fallbackProducts: Product[] = [
   {
@@ -69,12 +68,6 @@ const fallbackProducts: Product[] = [
   },
 ]
 
-const seedQuotes: QuoteSummary[] = [
-  { id: 1, quoteNumber: 'QT-2025-1048', customerName: 'Meridian Health', customerEmail: 'purchasing@meridian.example', productName: 'Edge Server R440', total: 5671.5, status: 'In review', createdAt: '2025-02-14T10:00:00Z' },
-  { id: 2, quoteNumber: 'QT-2025-1047', customerName: 'Arcwell Design', customerEmail: 'it@arcwell.example', productName: 'Studio Workstation X', total: 3825, status: 'Sent', createdAt: '2025-02-13T10:00:00Z' },
-  { id: 3, quoteNumber: 'QT-2025-1046', customerName: 'Summit Labs', customerEmail: 'ops@summit.example', productName: 'Atlas Storage 24', total: 7580, status: 'Approved', createdAt: '2025-02-12T10:00:00Z' },
-]
-
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const exactCurrency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
@@ -84,7 +77,9 @@ function initialOptions(product: Product) {
 
 function App() {
   const [products, setProducts] = useState(fallbackProducts)
-  const [quotes, setQuotes] = useState(seedQuotes)
+  const [quotes, setQuotes] = useState<QuoteSummary[]>([])
+  const [overview, setOverview] = useState<SalesOverview | null>(null)
+  const [overviewError, setOverviewError] = useState('')
   const [selectedProductId, setSelectedProductId] = useState(fallbackProducts[0].id)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => initialOptions(fallbackProducts[0]))
   const [apiConnected, setApiConnected] = useState(false)
@@ -101,8 +96,8 @@ function App() {
 
   useEffect(() => {
     let active = true
-    void Promise.all([api.catalog(), api.quotes()])
-      .then(([catalog, recentQuotes]) => {
+    void Promise.all([api.catalog(), api.quotes(), api.overview()])
+      .then(([catalog, recentQuotes, salesOverview]) => {
         if (!active) return
         if (catalog.length > 0) {
           setProducts(catalog)
@@ -110,10 +105,15 @@ function App() {
           setSelectedOptions(initialOptions(catalog[0]))
         }
         setQuotes(recentQuotes)
+        setOverview(salesOverview)
         setApiConnected(true)
       })
       .catch(() => {
-        if (active) setApiConnected(false)
+        if (active) {
+          setApiConnected(false)
+          setQuotes([])
+          setOverview(null)
+        }
       })
     return () => { active = false }
   }, [])
@@ -184,6 +184,12 @@ function App() {
         notes: chatText,
       })
       setQuotes((current) => [quote, ...current])
+      setOverviewError('')
+      try {
+        setOverview(await api.overview())
+      } catch {
+        setOverviewError('Quote saved, but dashboard metrics could not be refreshed.')
+      }
       setQuoteMessage(`${quote.quoteNumber} created successfully.`)
       setQuoteDialogOpen(false)
       setCustomerName('')
@@ -271,23 +277,23 @@ function App() {
         <section className="stats-grid" aria-label="Sales overview">
           <article className="stat-card">
             <div className="stat-top"><span>Quotes this month</span><span className="stat-icon blue"><FileText size={17} /></span></div>
-            <div className="stat-value">{String(quotes.length + 24).padStart(2, '0')}<span className="stat-trend positive"><ArrowDownRight size={14} /> 12.8%</span></div>
-            <div className="stat-foot">vs. last month <span className="mini-bars"><i /><i /><i /><i /><i /><i /><i /></span></div>
+            <div className="stat-value">{overview?.quotesThisMonth ?? '—'}</div>
+            <div className="stat-foot">{overview ? `${overview.quotesLastMonth} last month` : 'Database metrics unavailable'}</div>
           </article>
           <article className="stat-card">
             <div className="stat-top"><span>Pipeline value</span><span className="stat-icon violet"><Tag size={17} /></span></div>
-            <div className="stat-value">$284,560<span className="stat-trend positive"><ArrowDownRight size={14} /> 8.2%</span></div>
-            <div className="stat-foot">across 18 open quotes <span className="mini-bars violet-bars"><i /><i /><i /><i /><i /><i /><i /></span></div>
+            <div className="stat-value">{overview ? currency.format(overview.pipelineValue) : '—'}</div>
+            <div className="stat-foot">{overview ? `Across ${overview.openQuotes} open quotes` : 'Database metrics unavailable'}</div>
           </article>
           <article className="stat-card">
             <div className="stat-top"><span>Win rate</span><span className="stat-icon green"><BadgeCheck size={17} /></span></div>
-            <div className="stat-value">68.4%<span className="stat-trend positive"><ArrowDownRight size={14} /> 4.6%</span></div>
-            <div className="stat-foot">healthy sales momentum <span className="mini-bars green-bars"><i /><i /><i /><i /><i /><i /><i /></span></div>
+            <div className="stat-value">{overview?.winRate == null ? '—' : `${overview.winRate.toFixed(1)}%`}</div>
+            <div className="stat-foot">{overview?.decidedQuotes ? `From ${overview.decidedQuotes} decided quotes` : overview ? 'No decided quotes yet' : 'Database metrics unavailable'}</div>
           </article>
-          <article className="stat-card agent-stat">
-            <div className="stat-top"><span>AI agents active</span><span className="stat-icon cyan"><Activity size={17} /></span></div>
-            <div className="stat-value">04<span className="stat-caption">working together</span></div>
-            <div className="stat-foot"><span className="pulse-dot" /> All systems operational</div>
+          <article className="stat-card">
+            <div className="stat-top"><span>Saved quotes</span><span className="stat-icon cyan"><Activity size={17} /></span></div>
+            <div className="stat-value">{overview?.totalQuotes ?? '—'}</div>
+            <div className="stat-foot">{overview ? 'Stored in the database' : 'Database metrics unavailable'}</div>
           </article>
         </section>
 
@@ -424,7 +430,7 @@ function App() {
               ))}
               {quotes.length === 0 && <div className="empty-quotes">No quotes yet. Configure a product to get started.</div>}
             </div>
-            {quoteMessage && <div className={`quote-feedback ${quoteMessage.includes('created successfully') ? 'success' : 'error'}`} role="status">{quoteMessage}<button aria-label="Dismiss message" onClick={() => setQuoteMessage('')}><X size={14} /></button></div>}
+            {(quoteMessage || overviewError) && <div className={`quote-feedback ${quoteMessage.includes('created successfully') ? 'success' : 'error'}`} role="status">{quoteMessage} {overviewError}<button aria-label="Dismiss message" onClick={() => { setQuoteMessage(''); setOverviewError('') }}><X size={14} /></button></div>}
             <div className="quote-panel-footer"><span><Activity size={14} /> Updated just now</span><button aria-label="Quote activity details"><ArrowRight size={14} /></button></div>
           </section>
         </section>

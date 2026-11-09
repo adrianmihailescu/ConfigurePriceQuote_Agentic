@@ -16,6 +16,7 @@ builder.Services.AddScoped<IProductAgent, ProductAgent>();
 builder.Services.AddScoped<IValidationAgent, ValidationAgent>();
 builder.Services.AddScoped<IPricingAgent, PricingAgent>();
 builder.Services.AddScoped<IQuotationAgent, QuotationAgent>();
+builder.Services.AddScoped<ISalesOverviewService, SalesOverviewService>();
 builder.Services.AddScoped<AgentOrchestrator>();
 builder.Services.AddProblemDetails();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
@@ -49,6 +50,15 @@ app.MapGet("/api/quotes", async (
         .Take(50)
         .ToListAsync(cancellationToken);
     return Results.Ok(quotes.Select(quotationAgent.CreateSummary));
+});
+
+app.MapGet("/api/overview", async (
+    DatabaseInitializer initializer,
+    ISalesOverviewService overviewService,
+    CancellationToken cancellationToken) =>
+{
+    await initializer.EnsureCreatedAsync(cancellationToken);
+    return Results.Ok(await overviewService.GetAsync(cancellationToken));
 });
 
 app.MapPost("/api/assistant/chat", async (

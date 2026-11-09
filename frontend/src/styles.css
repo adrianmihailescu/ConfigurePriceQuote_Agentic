@@ -305,3 +305,52 @@ h1, h2, h3, p { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+body { font-size: 15px; line-height: 1.5; }
+
+:is(
+  kbd, .connection, .profile-button, .workspace-switcher strong, .workspace-switcher small,
+  .nav-label, .nav-count, .agent-nav, .upgrade-card strong, .upgrade-card p, .upgrade-card button,
+  .user-profile strong, .user-profile small, .breadcrumb, .page-heading p, .stat-top, .stat-trend,
+  .stat-caption, .stat-foot, .eyebrow, .text-button, .panel-heading > div > span, .filter-button,
+  .product-name, .product-description, .product-card-bottom, .product-link, .catalog-footer,
+  .ready-badge, .config-product span, .config-product strong, .config-product small,
+  .option-group legend, .option-choice, .option-choice small, .price-summary > div,
+  .price-summary > div strong, .total-line small, .estimate-note, .live-tag, .workflow-copy strong,
+  .workflow-copy span, .workflow-state, .agent-chat input, .agent-result, .sample-note,
+  .quote-table-head, .quote-id, .quote-customer strong, .quote-customer small, .quote-amount,
+  .quote-status, .empty-quotes, .quote-feedback, .page-footer, .page-footer button,
+  .modal-description, .quote-modal label, .quote-modal label input, .modal-info, .modal-error,
+  .secondary-button
+) {
+  font-size: 12px;
+}
+
+:is(
+  .topbar-search input, .nav-item, .page-heading > .primary-button, .primary-button,
+  .section-title-row h2, .panel-heading h3, .empty-search, .agent-result, .modal-heading h2,
+  .modal-description
+) {
+  font-size: 14px;
+}
+
+.stats-grid, .workspace-grid, .lower-grid { gap: 18px; }
+.stats-grid { margin-bottom: 34px; }
+.stat-card { min-height: 120px; padding: 18px; }
+.configurator-section { margin-bottom: 34px; }
+.catalog-panel, .config-panel, .agent-panel, .quotes-panel { padding-right: 20px; padding-left: 20px; }
+.product-list { gap: 12px; margin-top: 18px; }
+.product-card { min-height: 104px; gap: 15px; padding: 10px; }
+.option-groups { gap: 16px; }
+.option-choices { gap: 8px; }
+.option-choice { min-height: 36px; padding: 7px 10px; }
+.workflow { margin: 20px 0 16px; padding: 14px 10px; }
+.workflow-step { gap: 7px; }
+.quote-row { min-height: 48px; }
+
+@media (max-width: 640px) {
+  .stats-grid { gap: 10px; }
+  .stat-card { min-height: 108px; padding: 13px; }
+  .catalog-panel, .config-panel, .agent-panel, .quotes-panel { padding-right: 14px; padding-left: 14px; }
+  .workflow { gap: 4px; padding: 12px 4px; }
+}

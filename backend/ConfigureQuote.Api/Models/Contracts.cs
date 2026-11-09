@@ -49,3 +49,12 @@ public sealed record QuoteSummary(
     decimal Total,
     string Status,
     DateTime CreatedAt);
+
+public sealed record SalesOverview(
+    int QuotesThisMonth,
+    int QuotesLastMonth,
+    int TotalQuotes,
+    int OpenQuotes,
+    decimal PipelineValue,
+    decimal? WinRate,
+    int DecidedQuotes);
