@@ -1,3 +1,10 @@
+export type AgentDefinition = {
+  fileName: string
+  name: string
+  description: string
+  delegatedAgents: string[]
+}
+
 export type ProductChoice = {
   id: string
   label: string

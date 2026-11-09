@@ -1,9 +1,4 @@
-type AgentDefinition = {
-  fileName: string
-  name: string
-  description: string
-  delegatedAgents: string[]
-}
+import type { AgentDefinition } from './types'
 
 const agentFiles = import.meta.glob<string>('../../.github/agents/*.agent.md', {
   eager: true,
