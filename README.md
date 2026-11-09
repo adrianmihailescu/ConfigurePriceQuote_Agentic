@@ -69,3 +69,5 @@ npm run test:e2e
 - `GET /api/quotes` — recent quotes
 - `POST /api/assistant/chat` — orchestrated product, pricing, and validation workflow
 - `POST /api/quotes` — validates and persists a quote
+
+![alt text](image.png)
