@@ -16,6 +16,24 @@ test('salesperson configures a product and gets an agent workflow preview', asyn
   await expect(page.getByText(/Pricing Agent:/)).toBeVisible()
 })
 
+test('agent lists come from the workspace agent definitions', async ({ page }) => {
+  await page.goto('/')
+
+  const roster = page.locator('.agent-nav')
+  for (const agent of ['CPQ Orchestrator', 'Pricing Agent', 'Product Agent', 'Quotation Agent', 'Validation Agent']) {
+    await expect(roster.getByText(agent)).toBeVisible()
+  }
+
+  const workflowSteps = page.locator('.workflow-step')
+  await expect(workflowSteps).toHaveCount(4)
+  await expect(workflowSteps).toContainText([
+    'Product Agent',
+    'Validation Agent',
+    'Pricing Agent',
+    'Quotation Agent',
+  ])
+})
+
 test('quote form explains persistence requirements when API is offline', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Create a quote' }).click()

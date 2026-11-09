@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   Activity,
   ArrowRight,
   BadgeCheck,
   Bell,
+  Bot,
   Boxes,
   Check,
   ChevronDown,
@@ -24,7 +25,30 @@ import {
   X,
 } from 'lucide-react'
 import { api } from './api'
+import { agents, workflowAgents } from './agents'
 import type { AgentStep, ChatResponse, Product, QuoteSummary, SalesOverview } from './types'
+import type { LucideIcon } from 'lucide-react'
+
+const agentIcons: Record<string, LucideIcon> = {
+  'Product Agent': Boxes,
+  'Pricing Agent': Cpu,
+  'Validation Agent': ShieldCheck,
+  'Quotation Agent': FileText,
+  'CPQ Orchestrator': Sparkles,
+}
+
+const agentAvatarClasses: Record<string, string> = {
+  'Product Agent': 'product-avatar',
+  'Pricing Agent': 'pricing-avatar',
+  'Validation Agent': 'validation-avatar',
+  'Quotation Agent': 'quote-avatar',
+  'CPQ Orchestrator': 'orchestrator-avatar',
+}
+
+function shortDescription(description: string) {
+  const sentence = description.split(/[.!?]\s/, 1)[0].replace(/[.!?]$/, '')
+  return sentence.length > 54 ? `${sentence.slice(0, 51).trimEnd()}...` : sentence
+}
 
 const fallbackProducts: Product[] = [
   {
@@ -246,10 +270,17 @@ function App() {
         </nav>
         <div className="nav-label agents-label">AI TEAM</div>
         <div className="agent-nav">
-          <span className="agent-avatar product-avatar"><Boxes size={14} /></span><span>Product Agent</span><i className="agent-online" />
-          <span className="agent-avatar pricing-avatar"><Cpu size={14} /></span><span>Pricing Agent</span><i className="agent-online" />
-          <span className="agent-avatar validation-avatar"><ShieldCheck size={14} /></span><span>Validation Agent</span><i className="agent-online" />
-          <span className="agent-avatar quote-avatar"><FileText size={14} /></span><span>Quotation Agent</span><i className="agent-online" />
+          {agents.map((agent) => {
+            const Icon = agentIcons[agent.name] ?? Bot
+            const avatarClass = agentAvatarClasses[agent.name] ?? 'quote-avatar'
+            return (
+              <Fragment key={agent.name}>
+                <span className={`agent-avatar ${avatarClass}`} title={agent.description}><Icon size={14} /></span>
+                <span title={agent.description}>{agent.name}</span>
+                <i className="agent-online" />
+              </Fragment>
+            )
+          })}
         </div>
         <div className="sidebar-bottom">
           <button className="nav-item" onClick={() => setActiveNav('Settings')}><Settings2 size={18} /><span>Settings</span></button>
@@ -382,19 +413,19 @@ function App() {
               <span className="live-tag"><i /> LIVE</span>
             </div>
             <div className="workflow">
-              {[
-                { name: 'Product Agent', note: 'Finds the right fit', Icon: Boxes, style: 'product-avatar' },
-                { name: 'Validation Agent', note: 'Checks compatibility', Icon: ShieldCheck, style: 'validation-avatar' },
-                { name: 'Pricing Agent', note: 'Calculates your estimate', Icon: Cpu, style: 'pricing-avatar' },
-                { name: 'Quotation Agent', note: 'Prepares the proposal', Icon: FileText, style: 'quote-avatar' },
-              ].map(({ name, note, Icon, style }, index) => (
-                <div className="workflow-step" key={name}>
-                  <div className={`workflow-icon ${style}`}><Icon size={16} /></div>
-                  <div className="workflow-copy"><strong>{name}</strong><span>{note}</span></div>
-                  <span className="workflow-state">{index === 0 && chatResponse ? <Check size={14} /> : index === 0 ? 'Ready' : 'Waiting'}</span>
-                  {index < 3 && <span className="workflow-connector" />}
-                </div>
-              ))}
+              {workflowAgents.map((agent, index) => {
+                const Icon = agentIcons[agent.name] ?? Bot
+                const avatarClass = agentAvatarClasses[agent.name] ?? 'quote-avatar'
+                const note = shortDescription(agent.description)
+                return (
+                  <div className="workflow-step" key={agent.name}>
+                    <div className={`workflow-icon ${avatarClass}`}><Icon size={16} /></div>
+                    <div className="workflow-copy"><strong>{agent.name}</strong><span title={agent.description}>{note}</span></div>
+                    <span className="workflow-state">{index === 0 && chatResponse ? <Check size={14} /> : index === 0 ? 'Ready' : 'Waiting'}</span>
+                    {index < workflowAgents.length - 1 && <span className="workflow-connector" />}
+                  </div>
+                )
+              })}
             </div>
             <form className="agent-chat" onSubmit={askAgents}>
               <span className="chat-sparkle"><Sparkles size={15} /></span>

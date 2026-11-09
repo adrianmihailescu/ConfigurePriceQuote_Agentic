@@ -61,6 +61,7 @@ kbd { color: #97a5b8; font: 10px var(--font-sans); white-space: nowrap; border: 
 .pricing-avatar { background: #fff4e8; color: #ef9b3b; }
 .validation-avatar { background: #edf2ff; color: #6484ed; }
 .quote-avatar { background: #f5efff; color: #9b6ce2; }
+.orchestrator-avatar { background: #f3edff; color: #9673df; }
 .agent-online { width: 6px; height: 6px; background: #48c58e; border-radius: 50%; }
 .sidebar-bottom { margin-top: auto; }
 .sidebar-bottom > .nav-item { margin-bottom: 2px; }
