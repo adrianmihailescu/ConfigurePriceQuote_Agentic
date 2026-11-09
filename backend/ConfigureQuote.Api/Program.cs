@@ -2,6 +2,8 @@ using System.Text.Json;
 using ConfigureQuote.Api.Data;
 using ConfigureQuote.Api.Models;
 using ConfigureQuote.Api.Services;
+using ConfigureQuote.Api.Services.Agents;
+using ConfigureQuote.Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
