@@ -409,7 +409,7 @@ function App() {
         <section className="lower-grid">
           <section className="agent-panel panel">
             <div className="panel-heading">
-              <div><div className="eyebrow"><span className="eyebrow-icon purple-icon"><Sparkles size={13} /></span> AGENTIC WORKFLOW</div><h3>Your AI team is ready</h3></div>
+              <div><div className="eyebrow"><span className="eyebrow-icon purple-icon"><Sparkles size={13} /></span> AGENTIC WORKFLOW</div><h3>AI Agents list</h3></div>
               <span className="live-tag"><i /> LIVE</span>
             </div>
             <div className="workflow">
